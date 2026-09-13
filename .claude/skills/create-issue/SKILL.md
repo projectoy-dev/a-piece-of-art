@@ -1,0 +1,65 @@
+---
+name: create-issue
+description: 작업 · 버그 설명을 이 저장소(projectoy-dev/a-piece-of-art)의 GitHub 이슈로 정리해 생성한다. "이슈 만들어줘", "이슈로 등록해줘" 같은 요청에 사용.
+argument-hint: "<만들 이슈 설명>"
+allowed-tools: Bash(gh auth status:*), Bash(gh repo view:*), Bash(gh issue list:*), Bash(gh issue create:*), Bash(gh label list:*), Bash(gh label create:*)
+---
+
+# GitHub 이슈 만들기
+
+요청: $ARGUMENTS
+
+규칙은 [`.claude/skills/CONVENTIONS.md`](../CONVENTIONS.md)를 따른다 (타입 · 영역 · 라벨 · 제목 형식).
+
+## 1. 준비 확인
+
+```bash
+gh auth status
+```
+
+로그인이 안 되어 있으면 멈추고 사용자에게 `! gh auth login` 실행을 안내한다.
+
+## 2. 내용 정리
+
+- 요청(위 `$ARGUMENTS`, 비어 있으면 지금까지의 대화)에서 **무엇을 · 왜**를 뽑는다.
+- 관련 코드가 있으면 직접 읽어서 파일 경로 · 현재 동작을 확인하고 본문에 적는다. 추측으로 채우지 않는다.
+- 타입 1개와 영역(1개 이상)을 정한다.
+- 요청에 서로 독립적인 작업이 여러 개 섞여 있으면 이슈를 나눈다. 한 이슈는 PR 하나로 끝낼 수 있는 크기로.
+- 무엇을 만들어야 하는지 자체가 불분명하면 그때만 사용자에게 질문한다. 세부 사항은 합리적으로 정하고 본문에 적는다.
+
+## 3. 중복 확인
+
+핵심 키워드로 열린 · 닫힌 이슈를 검색한다.
+
+```bash
+gh issue list --state all --search "<키워드>" --limit 10
+```
+
+거의 같은 이슈가 열려 있으면 새로 만들지 말고 그 이슈 번호를 알려준다.
+
+## 4. 라벨 준비
+
+```bash
+gh label list --limit 100 --json name --jq '.[].name'
+```
+
+붙일 라벨이 없으면 CONVENTIONS.md의 색 · 설명으로 만든다.
+
+```bash
+gh label create <라벨> --color <색> --description "<설명>"
+```
+
+## 5. 이슈 생성
+
+- 제목: `<type>(<area>): <요약>`
+- 본문: [`template.md`](template.md)에서 타입에 맞는 템플릿을 골라 채운다. 해당 없는 섹션은 지운다.
+- 본문은 임시 파일에 쓰고 `--body-file`로 넘긴다 (따옴표 · 줄바꿈 깨짐 방지). 임시 파일은 스크래치패드 디렉터리에 둔다.
+
+```bash
+gh issue create --title "<제목>" --body-file <본문 파일> --label <타입> --label <영역>
+```
+
+## 6. 결과 보고
+
+- 이슈 번호 · 제목 · URL
+- 이어서 작업하려면 `/ship-issue <번호>`를 쓰면 된다고 한 줄 안내
