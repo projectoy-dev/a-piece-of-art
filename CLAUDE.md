@@ -1,6 +1,7 @@
 # a-piece-of-art
 
 프로젝트 구성 · 로컬 개발 방법은 [`README.md`](README.md)를 봅니다.
+server 작업 규칙(특히 DB 작업 절차)은 [`server/CLAUDE.md`](server/CLAUDE.md)에 있습니다.
 
 ## git · GitHub 작업
 
