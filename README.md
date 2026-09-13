@@ -31,6 +31,16 @@ make dev        # http://localhost:8000
 
 그 밖의 명령은 `make help`로 확인합니다.
 
+## DB 스키마
+
+테이블 · 컬럼 · 설명은 [`server/docs/db-schema.md`](server/docs/db-schema.md) 한 곳에서 봅니다. 모델(`server/app/models/`)에서 자동으로 만드는 문서라 직접 고치지 않습니다.
+
+```bash
+make db-schema  # 모델을 고친 뒤 문서 다시 만들기 — 문서가 모델과 다르면 server CI가 실패
+```
+
+DB 작업 절차(비슷한 테이블 · 컬럼 확인 → 재사용 검토 → 설명 필수)는 [`server/CLAUDE.md`](server/CLAUDE.md)를 봅니다.
+
 ## 배포
 
 - `develop` 브랜치 → dev, `main` 브랜치 → prod
