@@ -27,7 +27,7 @@ FastAPI: `/api/v1` JSON API + `/cms` 관리자 화면. 계층은 `api` · `cms` 
 
 ### 모델 규칙
 
-- 테이블 이름은 복수형 snake_case (`artworks`), FK 컬럼은 `<단수형>_id` + `ondelete` 명시
+- 테이블 이름은 복수형 snake_case (`posts`), FK 컬럼은 `<단수형>_id` + `ondelete` 명시
 - 파일은 URL이 아니라 저장소 키를 `*_key` 컬럼에 저장하고, URL은 `app.utils.media.media_url()`로 만듭니다.
 - 불리언은 `is_*`, 생성 · 수정 시각은 직접 만들지 말고 `TimestampMixin`을 씁니다.
 - 관계는 `lazy="raise"` 또는 `lazy="selectin"` — 비동기 환경이라 암묵적 지연 로딩을 쓰지 않습니다.

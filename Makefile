@@ -23,7 +23,7 @@ dev: ## server 개발 서버 실행 (http://localhost:8000)
 migrate: ## DB 마이그레이션 적용
 	$(SERVER) uv run alembic upgrade head
 
-migration: ## 마이그레이션 생성 — make migration m="create artworks"
+migration: ## 마이그레이션 생성 — make migration m="create posts"
 	$(SERVER) uv run alembic revision --autogenerate -m "$(m)"
 
 db-schema: ## DB 스키마 문서 생성 (server/docs/db-schema.md)
