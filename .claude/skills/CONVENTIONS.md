@@ -65,6 +65,7 @@
 
 - `develop` → dev 배포, `main` → prod 배포
 - 작업 브랜치는 `origin/develop`이 있으면 `develop`에서, 없으면 `main`에서 따고 같은 곳으로 PR을 보냅니다.
+- `develop`을 `main`에 반영할 때는 [배포](#배포-develop--main) 절차를 따릅니다.
 
 ## 커밋
 
@@ -91,3 +92,40 @@
 - 머지: squash 머지, 머지 후 원격 브랜치 삭제
 - `Closes #N`은 저장소의 **기본 브랜치**로 머지될 때만 이슈를 자동으로 닫습니다. 기본 브랜치가 아닌 곳으로 머지했다면 이슈를 직접 닫습니다.
   기본 브랜치 확인: `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`
+
+## 배포 (develop → main)
+
+`main`은 PR이나 머지 커밋 없이 **fast-forward**로만 올립니다. `main`은 항상 `develop`의 과거 커밋 중 하나가 되고, 두 브랜치 히스토리가 똑같이 유지됩니다. PR을 만들지 않으므로 이슈도 따로 만들지 않습니다.
+
+1. 사전 확인 — Claude가 실행해서 결과를 보여줘도 됩니다.
+
+   ```bash
+   git fetch origin --prune
+   git merge-base --is-ancestor origin/main origin/develop && echo ok   # ok가 안 나오면 fast-forward 불가 — 멈추고 원인 확인
+   git log --oneline origin/main..origin/develop                         # main에 반영될 커밋
+   git diff --name-only origin/main origin/develop                       # 바뀌는 파일
+   ```
+
+   바뀌는 파일에 아래 경로가 있으면 푸시하는 순간 prod 배포 워크플로가 실행됩니다.
+
+   | 워크플로 | 트리거 경로 |
+   |---|---|
+   | `server-deploy` | `server/**`, `infra/ecs/**`, `scripts/ecs-migrate.sh`, `.github/workflows/server-*.yml` |
+   | `front-deploy` | `front/**`, `amplify.yml`, `.github/workflows/front-*.yml` |
+
+2. 푸시 — **사람이 직접 실행합니다.** Claude는 1번 결과와 아래 명령만 안내하고 직접 푸시하지 않습니다 (Claude Code에서는 앞에 `!`를 붙여 실행).
+
+   ```bash
+   git push origin origin/develop:refs/heads/main
+   ```
+
+   성공하면 `<이전 커밋>..<새 커밋>  origin/develop -> main` 줄이 출력됩니다.
+
+3. 푸시 후
+
+   ```bash
+   git fetch origin main:main            # 로컬 main 동기화 (main을 체크아웃 중이면: git merge --ff-only origin/main)
+   gh run list --branch main --limit 5   # 배포 워크플로 결과 확인
+   ```
+
+- `main`에 직접 커밋하거나 PR을 머지하지 않습니다. 긴급 수정도 `develop`에 머지한 뒤 같은 방법으로 올립니다. `main`이 `develop`보다 앞서면 fast-forward가 불가능해집니다.
