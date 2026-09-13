@@ -1,11 +1,11 @@
-{# 사용: include 전에 result(Page), list_url 설정. HTMX로 #artwork-rows 조각만 교체 #}
+{# 사용: include 전에 result(Page), list_url, rows_target(교체할 목록 조각 선택자, 예: "#rows") 설정 #}
 {% set total_pages = ((result.total + result.size - 1) // result.size) or 1 %}
 {% if total_pages > 1 %}
 <nav class="pagination">
   {% for p in range(1, total_pages + 1) %}
     <a href="{{ list_url }}?page={{ p }}"
        hx-get="{{ list_url }}?page={{ p }}"
-       hx-target="#artwork-rows"
+       hx-target="{{ rows_target }}"
        hx-swap="outerHTML"
        hx-push-url="true"
        class="{{ 'active' if p == result.page }}">{{ p }}</a>

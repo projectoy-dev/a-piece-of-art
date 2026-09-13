@@ -1,12 +1,11 @@
-"""CMS 폼 데이터 → 스키마 변환 · 검증"""
+"""CMS 폼 입력 검증"""
 
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field, ValidationError, field_validator
+from pydantic import ValidationError
 from starlette.datastructures import UploadFile
 
-from app.schemas.artwork import ArtworkCreate, ArtworkUpdate
 from app.services.storage_service import UploadedFile
 
 ALLOWED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
@@ -15,25 +14,6 @@ MAX_IMAGE_BYTES = 20 * 1024 * 1024
 
 class FormError(ValueError):
     pass
-
-
-class ArtworkForm(BaseModel):
-    title: str = Field(min_length=1, max_length=200)
-    description: str | None = None
-    year: int | None = Field(default=None, ge=0, le=9999)
-    artist_id: int | None = None
-    is_published: bool = False  # 체크박스: 체크 시 "on", 미체크 시 필드 없음
-
-    @field_validator("description", "year", "artist_id", mode="before")
-    @classmethod
-    def empty_to_none(cls, value: Any) -> Any:
-        return None if value == "" else value
-
-    def to_create(self) -> ArtworkCreate:
-        return ArtworkCreate(**self.model_dump())
-
-    def to_update(self) -> ArtworkUpdate:
-        return ArtworkUpdate(**self.model_dump())
 
 
 def parse_image(value: Any) -> UploadedFile | None:

@@ -1,7 +1,7 @@
 # 공통 명령어 — `make help` 로 목록 확인
 SERVER := cd server &&
 
-.PHONY: help setup db-up db-down dev migrate migration db-schema test lint format admin
+.PHONY: help setup db-up db-down dev migrate migration db-schema test lint format
 
 help: ## 명령어 목록
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -37,6 +37,3 @@ lint: ## 린트 · 포맷 검사
 
 format: ## 자동 수정 · 포맷
 	$(SERVER) uv run ruff check --fix . && uv run ruff format .
-
-admin: ## CMS 관리자 생성 — make admin email=admin@example.com password=...
-	$(SERVER) uv run python -m app.cli create-admin --email "$(email)" --password "$(password)"

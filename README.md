@@ -19,7 +19,6 @@
 make setup      # 의존성 설치 + .env 파일 생성
 make db-up      # PostgreSQL 실행 (docker compose)
 make migrate    # 마이그레이션 적용
-make admin email=admin@example.com password=원하는비밀번호   # CMS 관리자 생성
 make dev        # http://localhost:8000
 ```
 
@@ -27,7 +26,6 @@ make dev        # http://localhost:8000
 |---|---|
 | http://localhost:8000/api/v1/health | API 상태 확인 |
 | http://localhost:8000/docs | API 문서 (OpenAPI) |
-| http://localhost:8000/cms/ | CMS 관리자 화면 |
 
 그 밖의 명령은 `make help`로 확인합니다.
 
