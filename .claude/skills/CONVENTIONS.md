@@ -23,6 +23,7 @@
 | `infra` | `infra/`, `scripts/`, `docker-compose.yml`, `amplify.yml` |
 | `ci` | `.github/` |
 | `docs` | `docs/`, `README.md` |
+| `claude` | `.claude/`, `CLAUDE.md` |
 
 여러 영역에 걸치면 가장 주된 영역 하나를 씁니다.
 
@@ -42,6 +43,7 @@
 | `server` | `1D76DB` | server/ |
 | `front` | `FBCA04` | front/ |
 | `infra` | `B60205` | infra/ |
+| `claude` | `D97757` | .claude/, CLAUDE.md |
 
 ## 이슈 제목
 
@@ -78,7 +80,14 @@
 
 ## PR
 
+**이슈 없이 PR을 만들지 않습니다.** 스킬을 쓰든 안 쓰든, PR을 만들기 전에 항상:
+
+1. 연결할 이슈가 있는지 확인합니다 — 브랜치 이름의 번호, 대화에서 나온 번호, `gh issue list --state open --search "<키워드>"`
+2. 없으면 `/create-issue` 절차로 이슈부터 만듭니다.
+3. 이슈 번호 없이 시작한 브랜치라면 PR 전에 `git branch -m <type>/<N>-<요약>`으로 이름을 맞춥니다 (이미 푸시했다면 새 이름으로 푸시하고 옛 원격 브랜치는 삭제).
+
 - 제목: 이슈 제목과 같게
 - 본문: `Closes #<이슈번호>` + 변경 요약 + 확인 방법 (Claude 표기 줄 없음)
 - 머지: squash 머지, 머지 후 원격 브랜치 삭제
-- `Closes #N`은 기본 브랜치(`main`)로 머지될 때만 이슈를 자동으로 닫습니다. `develop`으로 머지했다면 이슈를 직접 닫습니다.
+- `Closes #N`은 저장소의 **기본 브랜치**로 머지될 때만 이슈를 자동으로 닫습니다. 기본 브랜치가 아닌 곳으로 머지했다면 이슈를 직접 닫습니다.
+  기본 브랜치 확인: `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`

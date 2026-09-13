@@ -1,16 +1,17 @@
 ---
 name: ship-issue
-description: GitHub 이슈 번호를 받아 브랜치 생성 → 구현 → lint/test → 커밋 → PR → CI 대기 → squash 머지까지 한 번에 진행한다.
-argument-hint: "<이슈번호> [--no-merge]"
+description: GitHub 이슈 번호를 받아 브랜치 생성 → 구현 → lint/test → 커밋 → PR → CI 대기 → squash 머지까지 한 번에 진행한다. 번호 없이 실행하면 이슈부터 만든다.
+argument-hint: "[이슈번호 | 작업 설명] [--no-merge]"
 disable-model-invocation: true
-allowed-tools: Bash(gh auth status:*), Bash(gh repo view:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(gh issue close:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gh run view:*), Bash(gh run list:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git fetch:*), Bash(git switch:*), Bash(git pull:*), Bash(git branch:*), Bash(git ls-remote:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(make lint:*), Bash(make format:*), Bash(make test:*)
+allowed-tools: Bash(gh auth status:*), Bash(gh repo view:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(gh issue close:*), Bash(gh issue list:*), Bash(gh issue create:*), Bash(gh label list:*), Bash(gh label create:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gh run view:*), Bash(gh run list:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git fetch:*), Bash(git switch:*), Bash(git pull:*), Bash(git branch:*), Bash(git ls-remote:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(make lint:*), Bash(make format:*), Bash(make test:*)
 ---
 
 # 이슈 → 머지까지 한 번에
 
 인자: $ARGUMENTS
 
-- 첫 번째 숫자 = 이슈 번호 (`#12`, `12` 모두 허용). 없으면 멈추고 번호를 물어본다.
+- 첫 번째 숫자 = 이슈 번호 (`#12`, `12` 모두 허용).
+- 번호가 없으면 나머지 텍스트(비어 있으면 지금까지의 대화)를 작업 설명으로 보고 2단계에서 이슈부터 만든다. 설명도 없으면 무엇을 할지 묻는다.
 - `--no-merge`가 있으면 PR 생성 + CI 통과까지만 하고 머지하지 않는다.
 
 규칙은 [`.claude/skills/CONVENTIONS.md`](../CONVENTIONS.md)를 따른다 (브랜치 이름 · 기준 브랜치 · 커밋 · PR · 머지 방식).
@@ -27,7 +28,12 @@ git status --porcelain
 - gh 로그인이 안 되어 있으면 멈추고 `! gh auth login`을 안내한다.
 - 작업 트리에 커밋 안 된 변경이 있으면 멈추고 사용자에게 어떻게 할지 묻는다 (이 이슈와 무관한 변경을 섞지 않기 위해). 임의로 stash · 삭제하지 않는다.
 
-## 2. 이슈 읽기
+## 2. 이슈 확인 · 읽기
+
+이슈 없이는 진행하지 않는다. 번호가 없으면 먼저:
+
+1. `gh issue list --state open --search "<키워드>"`로 이미 있는 이슈인지 확인하고, 있으면 그 번호를 쓴다.
+2. 없으면 [`create-issue`](../create-issue/SKILL.md) 절차(내용 정리 → 라벨 준비 → 생성)대로 이슈를 만들고 그 번호로 계속한다.
 
 ```bash
 gh issue view <N> --json number,title,body,labels,state,comments
@@ -137,7 +143,7 @@ gh pr merge <PR번호> --squash --delete-branch --subject "<PR 제목> (#<PR번�
 ```
 
 - 리뷰 필수 등 브랜치 보호로 막히면 `--admin` 등으로 우회하지 않는다. 멈추고 PR URL과 막힌 이유를 보고한다.
-- 기준 브랜치가 `main`이 아니면 이슈가 자동으로 닫히지 않으므로 직접 닫는다.
+- `Closes #N`은 기본 브랜치로 머지될 때만 이슈를 닫는다. 기준 브랜치가 저장소 기본 브랜치(`gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`)가 아니면 직접 닫고, 기본 브랜치면 `gh issue view <N> --json state`로 닫혔는지만 확인한다.
 
   ```bash
   gh issue close <N> --comment "#<PR번호> 로 <기준>에 머지됨"
