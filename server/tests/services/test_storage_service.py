@@ -11,10 +11,10 @@ async def test_local_upload_and_delete(tmp_path, monkeypatch):
 
     key = await storage.upload(
         UploadedFile(io.BytesIO(b"image-bytes"), "Photo.JPG", "image/jpeg"),
-        prefix="artworks/1",
+        prefix="uploads/1",
     )
 
-    assert key.startswith("artworks/1/")
+    assert key.startswith("uploads/1/")
     assert key.endswith(".jpg")
     assert (tmp_path / key).read_bytes() == b"image-bytes"
     assert storage.url(key) == f"{settings.media_base_url}/{key}"
