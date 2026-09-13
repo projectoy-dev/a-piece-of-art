@@ -11,15 +11,10 @@
 {% block layout %}
 <div class="layout">
   <aside class="sidebar">
-    <a class="brand" href="{{ url_for('cms_dashboard') }}">a-piece-of-art <span>CMS</span></a>
+    <span class="brand">a-piece-of-art <span>CMS</span></span>
     <nav>
-      <a href="{{ url_for('cms_dashboard') }}" class="{{ 'active' if active == 'dashboard' }}">대시보드</a>
-      <a href="{{ url_for('cms_artwork_list') }}" class="{{ 'active' if active == 'artworks' }}">작품</a>
+      {% block nav %}{% endblock %}
     </nav>
-    <form class="logout" method="post" action="{{ url_for('cms_logout') }}">
-      <span>{{ user.email }}</span>
-      <button type="submit" class="btn btn-ghost">로그아웃</button>
-    </form>
   </aside>
   <main class="content">
     {% block content %}{% endblock %}

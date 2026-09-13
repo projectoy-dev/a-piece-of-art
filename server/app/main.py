@@ -7,7 +7,6 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.v1.router import api_router
-from app.cms.deps import CmsLoginRequired, redirect_to_login
 from app.cms.router import cms_router
 from app.core.config import settings
 from app.core.database import engine
@@ -44,7 +43,6 @@ app.add_middleware(
 )
 
 app.add_exception_handler(NotFoundError, not_found_handler)
-app.add_exception_handler(CmsLoginRequired, redirect_to_login)
 
 app.include_router(api_router, prefix="/api/v1")  # JSON API — front가 호출
 app.include_router(cms_router, prefix="/cms")  # CMS HTML 화면 — 관리자가 접속
