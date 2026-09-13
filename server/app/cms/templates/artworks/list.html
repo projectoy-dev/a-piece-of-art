@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}작품{% endblock %}
+
+{% block content %}
+<header class="page-header">
+  <h1>작품 <span class="muted">{{ result.total }}</span></h1>
+  <a class="btn btn-primary" href="{{ url_for('cms_artwork_new') }}">새 작품</a>
+</header>
+
+{% include "artworks/_rows.html" %}
+{% endblock %}

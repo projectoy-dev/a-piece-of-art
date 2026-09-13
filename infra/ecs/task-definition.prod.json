@@ -1,0 +1,39 @@
+{
+  "family": "a-piece-of-art-prod-server",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/a-piece-of-art-prod-ecs-execution",
+  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/a-piece-of-art-prod-ecs-task",
+  "containerDefinitions": [
+    {
+      "name": "server",
+      "image": "IMAGE_INJECTED_BY_GITHUB_ACTIONS",
+      "essential": true,
+      "portMappings": [{ "containerPort": 8000, "protocol": "tcp" }],
+      "environment": [{ "name": "APP_ENV", "value": "prod" }],
+      "secrets": [
+        { "name": "DATABASE_URL", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/DATABASE_URL" },
+        { "name": "SECRET_KEY", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/SECRET_KEY" },
+        { "name": "CMS_SESSION_SECRET", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/CMS_SESSION_SECRET" },
+        { "name": "CORS_ORIGINS", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/CORS_ORIGINS" },
+        { "name": "STORAGE_BACKEND", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/STORAGE_BACKEND" },
+        { "name": "S3_BUCKET", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/S3_BUCKET" },
+        { "name": "MEDIA_BASE_URL", "valueFrom": "arn:aws:ssm:ap-northeast-2:<ACCOUNT_ID>:parameter/a-piece-of-art/prod/server/MEDIA_BASE_URL" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/a-piece-of-art-prod-server",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "server"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+name: server-deploy
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "server/**"
+      - "infra/ecs/**"
+      - "scripts/ecs-migrate.sh"
+      - ".github/workflows/server-*.yml"
+
+concurrency:
+  group: server-deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: a-piece-of-art-server
+
+jobs:
+  ci:
+    uses: ./.github/workflows/server-ci.yml
+
+  deploy:
+    needs: ci
+    # AWS 리소스 준비 후 저장소 Variables에 SERVER_DEPLOY_ENABLED=true 를 등록하면 배포가 켜집니다.
+    if: ${{ vars.SERVER_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'dev' }} # Environment별 Variables 사용
+    permissions:
+      id-token: write # OIDC 토큰 발급
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+
+      - name: 이미지 빌드 · 푸시
+        run: |
+          IMAGE="${{ steps.ecr.outputs.registry }}/${ECR_REPOSITORY}:${{ github.sha }}"
+          docker build -t "$IMAGE" server
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: 태스크 정의에 새 이미지 주입
+        id: td
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: infra/ecs/task-definition.${{ vars.APP_ENV }}.json
+          container-name: server
+          image: ${{ env.IMAGE }}
+
+      - name: DB 마이그레이션 (일회성 태스크)
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_SUBNETS: ${{ vars.ECS_SUBNETS }}
+          ECS_SECURITY_GROUPS: ${{ vars.ECS_SECURITY_GROUPS }}
+        run: ./scripts/ecs-migrate.sh "${{ steps.td.outputs.task-definition }}"
+
+      - name: ECS 서비스 배포
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.td.outputs.task-definition }}
+          cluster: ${{ vars.ECS_CLUSTER }}
+          service: ${{ vars.ECS_SERVICE }}
+          wait-for-service-stability: true

@@ -1,0 +1,57 @@
+name: front-ci
+
+on:
+  pull_request:
+    paths: ["front/**", ".github/workflows/front-ci.yml"]
+  workflow_call:
+    outputs:
+      exists:
+        description: "front 프로젝트(package.json) 존재 여부"
+        value: ${{ jobs.build.outputs.exists }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.check.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: front 프로젝트 존재 확인
+        id: check
+        run: |
+          if [ -f front/package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "front/package.json 이 없어 front CI를 건너뜁니다."
+          fi
+
+      # TODO(front 담당자): 아래 단계를 패키지 매니저 · 스크립트에 맞게 수정하세요 (pnpm 기준 예시)
+      - if: steps.check.outputs.exists == 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: front/package.json
+
+      - if: steps.check.outputs.exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: front/pnpm-lock.yaml
+
+      - if: steps.check.outputs.exists == 'true'
+        working-directory: front
+        run: pnpm install --frozen-lockfile
+
+      - if: steps.check.outputs.exists == 'true'
+        working-directory: front
+        run: pnpm run lint
+
+      - if: steps.check.outputs.exists == 'true'
+        working-directory: front
+        run: pnpm exec tsc --noEmit
+
+      - if: steps.check.outputs.exists == 'true'
+        working-directory: front
+        run: pnpm run build

@@ -1,0 +1,40 @@
+name: front-deploy
+
+on:
+  push:
+    branches: [main, develop]
+    paths: ["front/**", "amplify.yml", ".github/workflows/front-*.yml"]
+
+concurrency:
+  group: front-deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  ci:
+    uses: ./.github/workflows/front-ci.yml
+
+  deploy:
+    needs: ci
+    # front 프로젝트가 있고, 저장소 Variables에 FRONT_DEPLOY_ENABLED=true 가 등록된 경우에만 배포
+    if: ${{ needs.ci.outputs.exists == 'true' && vars.FRONT_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
+    permissions:
+      id-token: write # OIDC 토큰 발급
+      contents: read
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Amplify 브랜치의 자동 빌드는 꺼두고, CI 통과 후 여기서 빌드를 요청합니다.
+      - name: Amplify 빌드 요청
+        run: >
+          aws amplify start-job
+          --app-id "${{ vars.AMPLIFY_APP_ID }}"
+          --branch-name "${{ github.ref_name }}"
+          --job-type RELEASE

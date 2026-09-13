@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CMS{% endblock %} · a-piece-of-art</title>
+  <link rel="stylesheet" href="{{ url_for('cms-static', path='css/cms.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+</head>
+<body>
+{% block layout %}
+<div class="layout">
+  <aside class="sidebar">
+    <a class="brand" href="{{ url_for('cms_dashboard') }}">a-piece-of-art <span>CMS</span></a>
+    <nav>
+      <a href="{{ url_for('cms_dashboard') }}" class="{{ 'active' if active == 'dashboard' }}">대시보드</a>
+      <a href="{{ url_for('cms_artwork_list') }}" class="{{ 'active' if active == 'artworks' }}">작품</a>
+    </nav>
+    <form class="logout" method="post" action="{{ url_for('cms_logout') }}">
+      <span>{{ user.email }}</span>
+      <button type="submit" class="btn btn-ghost">로그아웃</button>
+    </form>
+  </aside>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}
+</body>
+</html>

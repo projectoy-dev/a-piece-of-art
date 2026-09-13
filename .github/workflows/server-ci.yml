@@ -1,0 +1,52 @@
+name: server-ci
+
+on:
+  pull_request:
+    paths: ["server/**", ".github/workflows/server-ci.yml"]
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql+asyncpg://app:app@localhost:5432/app_test
+      SECRET_KEY: ci-secret-key-for-tests-only-0123456789abcdef
+      CMS_SESSION_SECRET: ci-session-secret-for-tests-only-0123456789
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - run: uv sync --locked
+
+      - name: lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: 마이그레이션 적용 확인
+        run: uv run alembic upgrade head
+
+      - name: test
+        run: uv run pytest

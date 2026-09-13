@@ -1,0 +1,42 @@
+{# HTMX 부분 갱신용 조각 — 페이지 이동 시 이 블록만 교체됩니다 #}
+<div id="artwork-rows">
+  <div class="card table-card">
+    <table>
+      <thead>
+        <tr>
+          <th class="thumb-col">이미지</th>
+          <th>제목</th>
+          <th>작가</th>
+          <th>연도</th>
+          <th>공개</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for artwork in result.items %}
+        <tr>
+          <td>
+            {% if artwork.image_url %}<img class="thumb" src="{{ artwork.image_url }}" alt="">{% else %}<div class="thumb empty"></div>{% endif %}
+          </td>
+          <td><a href="{{ url_for('cms_artwork_edit', artwork_id=artwork.id) }}">{{ artwork.title }}</a></td>
+          <td>{{ artwork.artist.name if artwork.artist else '—' }}</td>
+          <td>{{ artwork.year or '—' }}</td>
+          <td>{% if artwork.is_published %}<span class="badge on">공개</span>{% else %}<span class="badge">비공개</span>{% endif %}</td>
+          <td class="actions">
+            <button class="btn btn-ghost btn-danger"
+                    hx-post="{{ url_for('cms_artwork_delete', artwork_id=artwork.id) }}"
+                    hx-confirm="'{{ artwork.title }}' 작품을 삭제할까요?"
+                    hx-target="closest tr"
+                    hx-swap="outerHTML">삭제</button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-row">등록된 작품이 없습니다.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% set list_url = url_for('cms_artwork_list') %}
+  {% include "components/_pagination.html" %}
+</div>
