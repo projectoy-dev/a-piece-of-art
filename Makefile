@@ -1,7 +1,7 @@
 # 공통 명령어 — `make help` 로 목록 확인
 SERVER := cd server &&
 
-.PHONY: help setup db-up db-down dev migrate migration test lint format admin
+.PHONY: help setup db-up db-down dev migrate migration db-schema test lint format admin
 
 help: ## 명령어 목록
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
@@ -25,6 +25,9 @@ migrate: ## DB 마이그레이션 적용
 
 migration: ## 마이그레이션 생성 — make migration m="create artworks"
 	$(SERVER) uv run alembic revision --autogenerate -m "$(m)"
+
+db-schema: ## DB 스키마 문서 생성 (server/docs/db-schema.md)
+	$(SERVER) uv run python -m app.utils.schema_doc
 
 test: ## 테스트
 	$(SERVER) uv run pytest
