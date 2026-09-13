@@ -3,7 +3,7 @@ name: ship-issue
 description: GitHub 이슈 번호를 받아 브랜치 생성 → 구현 → lint/test → 커밋 → 보안 체크 · 동작 확인 → PR → CI 대기 → squash 머지까지 한 번에 진행한다. 번호 없이 실행하면 이슈부터 만든다.
 argument-hint: "[이슈번호 | 작업 설명] [--no-merge]"
 disable-model-invocation: true
-allowed-tools: Bash(gh auth status:*), Bash(gh repo view:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(gh issue close:*), Bash(gh issue list:*), Bash(gh issue create:*), Bash(gh label list:*), Bash(gh label create:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gh run view:*), Bash(gh run list:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git fetch:*), Bash(git switch:*), Bash(git pull:*), Bash(git branch:*), Bash(git ls-remote:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(make lint:*), Bash(make format:*), Bash(make test:*), Bash(make db-up:*), Bash(make migrate:*), Bash(make db-schema:*), Bash(curl:*)
+allowed-tools: Bash(gh auth status:*), Bash(gh repo view:*), Bash(gh issue view:*), Bash(gh issue edit:*), Bash(gh issue close:*), Bash(gh issue list:*), Bash(gh issue create:*), Bash(gh label list:*), Bash(gh label create:*), Bash(gh pr create:*), Bash(gh pr view:*), Bash(gh pr checks:*), Bash(gh pr merge:*), Bash(gh run view:*), Bash(gh run list:*), Bash(git status:*), Bash(git diff:*), Bash(git log:*), Bash(git fetch:*), Bash(git switch:*), Bash(git pull:*), Bash(git branch:*), Bash(git ls-remote:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(make lint:*), Bash(make format:*), Bash(make test:*), Bash(make db-up:*), Bash(make migrate:*), Bash(make db-schema:*), Bash(curl -fsS localhost:*)
 ---
 
 # 이슈 → 머지까지 한 번에
